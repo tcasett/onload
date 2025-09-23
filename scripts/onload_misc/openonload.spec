@@ -78,6 +78,7 @@
 %bcond_without dkms # add option to skip DKMS package
 %bcond_without examples # add option to skip examples package
 
+%define pkgconfig_pc /usr/lib64/pkgconfig/open_onload.pc
 %define pkgversion 20100910
 
 %undefine __brp_mangle_shebangs
@@ -271,6 +272,7 @@ This package comprises development headers for the components of OpenOnload.
 
 %files devel
 %defattr(-,root,root)
+%{pkgconfig_pc}
 %{_includedir}/ci
 %{_includedir}/cplane
 %{_includedir}/etherfabric
@@ -398,6 +400,21 @@ mkdir build
 %endif
 
 %install
+mkdir -p %{buildroot}/usr/lib64/pkgconfig/
+cat <<EOF > %{buildroot}%{pkgconfig_pc}
+prefix=/usr
+exec_prefix=\${prefix}
+libdir=\${prefix}/lib64
+includedir=\${prefix}/include/onload
+install_suffix=
+
+Name: OpenOnload
+Description: Onload is a high performance user-level network stack, which accelerates TCP and UDP network I/O for applications using the BSD sockets on Linux.
+URL: https://github.com/Xilinx-CNS/onload
+Version: %{version}
+Cflags: -I\${includedir}
+Libs: -L\${libdir} -lonload_ext\${install_suffix}
+EOF
 %if %{with user}%{with kmod}%{with devel}%{with examples}
 export i_prefix=%{buildroot}
 mkdir -p "$i_prefix/etc/modprobe.d"
